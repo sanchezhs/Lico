@@ -184,7 +184,6 @@ fun ShoppingListCard(
 
                     TextButton(onClick = {
                         showBottomSheet = false
-                        // TODO: Copiar lista
                         showCopyDialog = true
                     }) {
                         Icon(
