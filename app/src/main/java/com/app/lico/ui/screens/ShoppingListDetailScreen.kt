@@ -1,5 +1,6 @@
 package com.app.lico.ui.screens
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -19,8 +20,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +37,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -45,8 +51,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -73,21 +82,73 @@ fun ShoppingListDetailScreen(
     var itemQty by remember { mutableStateOf("1") }
     var itemUnit by remember { mutableStateOf("uds") }
 
-    val purchasedItems = currentList?.items?.filter { it.isPurchased }
-    val pendingItems = currentList?.items?.filterNot { it.isPurchased }
+    var isSearching by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
+    val purchasedItems = currentList?.items
+        ?.filter { it.isPurchased && it.name.contains(searchQuery, ignoreCase = true) }
+    val pendingItems = currentList?.items
+        ?.filter { !it.isPurchased && it.name.contains(searchQuery, ignoreCase = true) }
     var showPurchased by remember { mutableStateOf(false) }
+    val hasNoResults = pendingItems.isNullOrEmpty() && (showPurchased || purchasedItems.isNullOrEmpty())
 
     LaunchedEffect(Unit) {
         viewModel.loadShoppingLists()
     }
 
+    LaunchedEffect(isSearching) {
+        if (isSearching) {
+            focusRequester.requestFocus()
+        } else {
+            focusManager.clearFocus()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(currentList?.name ?: "") },
+                title = {
+                    AnimatedContent(targetState = isSearching, label = "searchBar") { searching ->
+                        if (searching) {
+                            TextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                placeholder = { Text("Buscar producto...") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                    errorContainerColor = Color.Transparent,
+                                    disabledIndicatorColor = Color.Transparent,
+                                    disabledTextColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                )
+                            )
+                        } else {
+                            Text(currentList?.name ?: "")
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        isSearching = !isSearching
+                        if (!isSearching) searchQuery = ""
+                    }) {
+                        Icon(
+                            imageVector = if (isSearching) Icons.Default.Close else Icons.Default.Search,
+                            contentDescription = "Buscar producto"
+                        )
                     }
                 }
             )
@@ -118,6 +179,21 @@ fun ShoppingListDetailScreen(
                     Spacer(modifier = Modifier.height(7.dp))
                 }
                 item {
+                    if (hasNoResults && searchQuery.isNotBlank()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "No se encontraron productos",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
                     if (!purchasedItems.isNullOrEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
 
@@ -344,7 +420,7 @@ fun ShoppingItemRow(
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
-                            text = "Renombrar",
+                            text = "Editar",
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     }
