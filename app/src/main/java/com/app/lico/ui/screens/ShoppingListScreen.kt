@@ -47,8 +47,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.app.lico.R
 import com.app.lico.models.ShoppingList
 import com.app.lico.viewmodels.ShoppingViewModel
 import java.util.Locale
@@ -86,7 +88,8 @@ fun ShoppingListsScreen(
                             list = list,
                             onClick = { onNavigateListDetail(list.id) },
                             onRename = { newName -> viewModel.renameShoppingList(list, newName) },
-                            onDelete = { viewModel.deleteShoppingList(list) }
+                            onDelete = { viewModel.deleteShoppingList(list) },
+                            onCopy = { newList -> viewModel.addShoppingList(newList) }
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }
@@ -117,6 +120,7 @@ fun ShoppingListCard(
     onClick: () -> Unit = {},
     onRename: (String) -> Unit = {},
     onDelete: () -> Unit = {},
+    onCopy: (ShoppingList) -> Unit = {},
 ) {
     val totalItems = list.items.size
     val purchasedItems = list.items.count { it.isPurchased }
@@ -124,6 +128,7 @@ fun ShoppingListCard(
 
     var showBottomSheet by remember { mutableStateOf(false) }
     var showRenameDialog by remember { mutableStateOf(false) }
+    var showCopyDialog by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var renameInput by remember { mutableStateOf(list.name) }
 
@@ -179,6 +184,22 @@ fun ShoppingListCard(
 
                     TextButton(onClick = {
                         showBottomSheet = false
+                        // TODO: Copiar lista
+                        showCopyDialog = true
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_file_copy_24),
+                            contentDescription = "Copy Icon",
+                            modifier = Modifier.size(25.dp),
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "Copiar",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                    TextButton(onClick = {
+                        showBottomSheet = false
                         showDeleteConfirm = true
                     }) {
                         Icon(
@@ -192,12 +213,10 @@ fun ShoppingListCard(
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     }
-
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
-
     }
 
     // RENAMING DIALOG
@@ -224,6 +243,45 @@ fun ShoppingListCard(
             dismissButton = {
                 TextButton(onClick = {
                     showRenameDialog = false
+                    renameInput = list.name
+                }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    // COPY DIALOG
+    if (showCopyDialog) {
+        AlertDialog(
+            onDismissRequest = { showCopyDialog = false },
+            title = { Text("Copiar lista") },
+            text = {
+                OutlinedTextField(
+                    value = renameInput,
+                    onValueChange = { renameInput = it },
+                    label = { Text("Nuevo nombre") },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val copiedList = list.copy(
+                        id = 0L,
+                        name = renameInput,
+                        items = list.items.map {
+                            it.copy(id = 0L, isPurchased = false)
+                        }.toMutableList()
+                    )
+                    onCopy(copiedList)
+                    showCopyDialog = false
+                }) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showCopyDialog = false
                     renameInput = list.name
                 }) {
                     Text("Cancelar")
