@@ -1,5 +1,6 @@
 package com.app.lico.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,11 +19,11 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -132,49 +133,71 @@ fun ShoppingListCard(
             onDismissRequest = { showBottomSheet = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             containerColor = Color.White,
+            dragHandle = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    BottomSheetDefaults.DragHandle()
+                }
+            }
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Administrar lista".uppercase(Locale.getDefault()),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                TextButton(onClick = {
-                    showBottomSheet = false
-                    showRenameDialog = true
-                }) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Edit Icon",
-                        modifier = Modifier.size(25.dp),
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                ) {
                     Text(
-                        text = "Renombrar",
-                        style = MaterialTheme.typography.bodyLarge,
+                        text = "Administrar lista".uppercase(Locale.getDefault()),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(start = 24.dp, bottom = 8.dp)
                     )
                 }
 
-                TextButton(onClick = {
-                    showBottomSheet = false
-                    showDeleteConfirm = true
-                }) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Delete Icon",
-                        modifier = Modifier.size(25.dp),
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Text(
-                        text = "Borrar",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
+                // Contenido
+                Column(modifier = Modifier.padding(16.dp)) {
+                    TextButton(onClick = {
+                        showBottomSheet = false
+                        showRenameDialog = true
+                    }) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit Icon",
+                            modifier = Modifier.size(25.dp),
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "Renombrar",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+
+                    TextButton(onClick = {
+                        showBottomSheet = false
+                        showDeleteConfirm = true
+                    }) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete Icon",
+                            modifier = Modifier.size(25.dp),
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "Borrar",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
+
     }
 
     // RENAMING DIALOG
@@ -214,7 +237,7 @@ fun ShoppingListCard(
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
             title = { Text("Eliminar lista") },
-            text = { Text("¿Estás segura de que quieres eliminar esta lista? Esta acción no se puede deshacer.") },
+            text = { Text("¿Seguro que quieres eliminar esta lista? Esta acción no se puede deshacer.") },
             confirmButton = {
                 TextButton(onClick = {
                     onDelete()

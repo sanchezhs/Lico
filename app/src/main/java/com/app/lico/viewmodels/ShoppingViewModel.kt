@@ -83,4 +83,19 @@ class ShoppingViewModel @Inject constructor(
         }
     }
 
+    fun updateItem(item: ShoppingItem, newName: String, newQty: Double, newUnit: String, listId: Long) {
+        viewModelScope.launch {
+            val updated = item.copy(name = newName, quantity = newQty, unit = newUnit)
+            itemDao.insertItem(updated.toEntity(listId))
+            loadShoppingLists()
+        }
+    }
+
+    fun deleteItem(item: ShoppingItem, listId: Long) {
+        viewModelScope.launch {
+            itemDao.deleteItem(item.toEntity(listId))
+            loadShoppingLists()
+        }
+    }
+
 }

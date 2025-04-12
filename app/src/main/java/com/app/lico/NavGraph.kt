@@ -11,7 +11,7 @@ import com.app.lico.ui.screens.ShoppingListDetailScreen
 
 object Routes {
     const val LISTS = "lists"
-    const val NEW_LIST = "NEW_LIST"
+    const val NEW_LIST = "new_list"
     const val LIST_DETAIL = "list_detail"
 }
 
