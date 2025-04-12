@@ -1,5 +1,6 @@
 package com.app.lico.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,12 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -36,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.lico.R
@@ -101,7 +103,7 @@ fun ShoppingListDetailScreen(
                     if (!purchasedItems.isNullOrEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        ElevatedButton(
+                        TextButton (
                             onClick = { showPurchased = !showPurchased },
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -110,19 +112,19 @@ fun ShoppingListDetailScreen(
 
                         if (showPurchased) {
                             Spacer(modifier = Modifier.height(12.dp))
-                            Column {
-                                purchasedItems.forEach { item ->
-                                    ShoppingItemRow(
-                                        item = item,
-                                        onTogglePurchased = {
-                                            viewModel.toggleItemPurchased(
-                                                item,
-                                                list.id
-                                            )
-                                        }
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                }
+
+                            purchasedItems.forEach { item ->
+                                ShoppingItemRow(
+                                    item = item,
+                                    isPurchased = true,
+                                    onTogglePurchased = {
+                                        viewModel.toggleItemPurchased(
+                                            item,
+                                            list.id
+                                        )
+                                    }
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                     }
@@ -140,38 +142,45 @@ fun ShoppingListDetailScreen(
                     OutlinedTextField(
                         value = itemName,
                         onValueChange = { itemName = it },
-                        label = { Text("Nombre") },
-                        modifier = Modifier.fillMaxWidth()
+                        label = { Text("Producto") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = itemQty,
                         onValueChange = { itemQty = it },
                         label = { Text("Cantidad") },
-                        modifier = Modifier.fillMaxWidth()
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = itemUnit,
                         onValueChange = { itemUnit = it },
                         label = { Text("Unidad") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
                     )
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    viewModel.addItemToList(
-                        name = itemName,
-                        quantity = itemQty.toDoubleOrNull() ?: 1.0,
-                        unit = itemUnit,
-                        listId = listId
-                    )
-                    itemName = ""
-                    itemQty = "1"
-                    itemUnit = "uds"
-                    showAddDialog = false
-                }) {
+                TextButton(
+                    enabled = itemName.isNotBlank(),
+                    onClick = {
+                        viewModel.addItemToList(
+                            name = itemName,
+                            quantity = itemQty.toDoubleOrNull() ?: 1.0,
+                            unit = itemUnit,
+                            listId = listId
+                        )
+                        itemName = ""
+                        itemQty = "1"
+                        itemUnit = "uds"
+                        showAddDialog = false
+                    }
+                ) {
                     Text("Añadir")
                 }
             },
@@ -187,10 +196,15 @@ fun ShoppingListDetailScreen(
 @Composable
 fun ShoppingItemRow(
     item: ShoppingItem,
-    onTogglePurchased: () -> Unit
+    onTogglePurchased: () -> Unit,
+    isPurchased: Boolean = false,
 ) {
+    val textColor = if (isPurchased) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+    val bgColor = if (isPurchased) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface
+    val quantityColor = if (isPurchased) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface
+
     Surface(
-        tonalElevation = 2.dp,
+        color = bgColor,
         shadowElevation = 4.dp,
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier.fillMaxWidth()
@@ -198,7 +212,8 @@ fun ShoppingItemRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(12.dp)
+                .background(color = bgColor),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
@@ -223,13 +238,14 @@ fun ShoppingItemRow(
             Text(
                 text = item.name,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(start = 8.dp)
+                color = textColor,
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
             Text(
                 text = "${item.quantity} ${item.unit}",
+                color = quantityColor,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(end = 8.dp)
             )
