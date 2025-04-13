@@ -8,6 +8,7 @@ import com.app.lico.data.db.entities.toDomain
 import com.app.lico.data.db.entities.toEntity
 import com.app.lico.models.ShoppingItem
 import com.app.lico.models.ShoppingList
+import com.app.lico.models.SortOption
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,13 +62,17 @@ class ShoppingViewModel @Inject constructor(
 
     fun addItemToList(name: String, quantity: Double, unit: String, listId: Long) {
         viewModelScope.launch {
+            val currentItems = itemDao.getItemsForList(listId)
+            val nextPosition = currentItems.maxOfOrNull { it.position }?.plus(1) ?: 0
+
             itemDao.insertItem(
                 ShoppingItem(
                     id = 0,
                     name = name,
                     quantity = quantity,
                     unit = unit,
-                    isPurchased = false
+                    isPurchased = false,
+                    position = nextPosition,
                 ).toEntity(listId)
             )
             loadShoppingLists()
@@ -94,8 +99,28 @@ class ShoppingViewModel @Inject constructor(
     fun deleteItem(item: ShoppingItem, listId: Long) {
         viewModelScope.launch {
             itemDao.deleteItem(item.toEntity(listId))
+            normalizePositions(listId)
             loadShoppingLists()
         }
     }
 
+    fun updateSortOption(listId: Long, option: SortOption) {
+        viewModelScope.launch {
+            listDao.updateSortOption(listId, option.name)
+            loadShoppingLists()
+        }
+    }
+
+    private fun normalizePositions(listId: Long) {
+        viewModelScope.launch {
+            val currentItems = itemDao.getItemsForList(listId)
+                .sortedBy { it.position }
+
+            currentItems.forEachIndexed { index, item ->
+                if (item.position != index) {
+                    itemDao.insertItem(item.copy(position = index))
+                }
+            }
+        }
+    }
 }

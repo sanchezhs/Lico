@@ -17,4 +17,8 @@ interface ShoppingItemDao {
 
     @Delete
     suspend fun deleteItem(item: ShoppingItemEntity)
+
+    @Query("SELECT * FROM shopping_items WHERE listId = :listId")
+    suspend fun getItemsForList(listId: Long): List<ShoppingItemEntity>
+
 }

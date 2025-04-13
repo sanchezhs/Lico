@@ -5,5 +5,6 @@ data class ShoppingItem(
     var name: String,
     var quantity: Double,
     var unit: String,
-    var isPurchased: Boolean
+    var isPurchased: Boolean,
+    val position: Int
 )

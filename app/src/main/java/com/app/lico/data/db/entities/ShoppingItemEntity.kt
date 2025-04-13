@@ -23,5 +23,6 @@ data class ShoppingItemEntity(
     val quantity: Double,
     val unit: String,
     val isPurchased: Boolean = false,
-    val listId: Long
+    val listId: Long,
+    val position: Int
 )

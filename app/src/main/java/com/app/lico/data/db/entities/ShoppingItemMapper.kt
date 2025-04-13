@@ -7,7 +7,8 @@ fun ShoppingItemEntity.toDomain(): ShoppingItem = ShoppingItem(
     name = name,
     quantity = quantity,
     unit = unit,
-    isPurchased = isPurchased
+    isPurchased = isPurchased,
+    position = position,
 )
 
 fun ShoppingItem.toEntity(listId: Long): ShoppingItemEntity = ShoppingItemEntity(
@@ -16,5 +17,6 @@ fun ShoppingItem.toEntity(listId: Long): ShoppingItemEntity = ShoppingItemEntity
     quantity = quantity,
     unit = unit,
     isPurchased = isPurchased,
-    listId = listId
+    listId = listId,
+    position = position,
 )

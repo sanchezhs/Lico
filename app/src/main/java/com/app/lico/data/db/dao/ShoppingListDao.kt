@@ -17,4 +17,8 @@ interface ShoppingListDao {
 
     @Delete
     suspend fun deleteList(list: ShoppingListEntity)
+
+    @Query("UPDATE shopping_lists SET sortOption = :sortOption WHERE id = :listId")
+    suspend fun updateSortOption(listId: Long, sortOption: String)
+
 }

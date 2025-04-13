@@ -26,6 +26,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -38,7 +40,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -64,6 +65,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.lico.R
 import com.app.lico.models.ShoppingItem
+import com.app.lico.models.SortOption
 import com.app.lico.viewmodels.ShoppingViewModel
 import java.util.Locale
 
@@ -77,6 +79,9 @@ fun ShoppingListDetailScreen(
     val list by viewModel.lists.collectAsState()
     val currentList = list.find { it.id == listId }
 
+    val sortOption = currentList?.sortOption ?: SortOption.DEFAULT
+    var showSortMenu by remember { mutableStateOf(false) }
+
     var showAddDialog by remember { mutableStateOf(false) }
     var itemName by remember { mutableStateOf("") }
     var itemQty by remember { mutableStateOf("1") }
@@ -88,10 +93,19 @@ fun ShoppingListDetailScreen(
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    val purchasedItems = currentList?.items
-        ?.filter { it.isPurchased && it.name.contains(searchQuery, ignoreCase = true) }
-    val pendingItems = currentList?.items
-        ?.filter { !it.isPurchased && it.name.contains(searchQuery, ignoreCase = true) }
+    val sortedItems = currentList?.items
+        ?.filter { it.name.contains(searchQuery, ignoreCase = true) }
+        ?.sortedWith(
+            when (sortOption) {
+                SortOption.DEFAULT -> compareBy { it.position }
+                SortOption.NAME -> compareBy { it.name.lowercase() }
+                SortOption.QUANTITY -> compareByDescending { it.quantity }
+            }
+        )
+
+    val purchasedItems = sortedItems?.filter { it.isPurchased }
+    val pendingItems = sortedItems?.filterNot { it.isPurchased }
+
     var showPurchased by remember { mutableStateOf(false) }
     val hasNoResults = pendingItems.isNullOrEmpty() && (showPurchased || purchasedItems.isNullOrEmpty())
 
@@ -150,6 +164,47 @@ fun ShoppingListDetailScreen(
                             contentDescription = "Buscar producto"
                         )
                     }
+                    IconButton(onClick = { showSortMenu = true }) {
+                        Icon(painter = painterResource(R.drawable.baseline_swap_vert_24), contentDescription = "Ordenar")
+                    }
+
+                    DropdownMenu(
+                        expanded = showSortMenu,
+                        onDismissRequest = { showSortMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(
+                                "Por defecto",
+                                color = if (sortOption == SortOption.DEFAULT) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                            )
+                           },
+                            onClick = {
+                                viewModel.updateSortOption(listId, SortOption.DEFAULT)
+                                showSortMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(
+                                "Alfabéticamente",
+                                color = if (sortOption == SortOption.NAME) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                            ) },
+                            onClick = {
+                                viewModel.updateSortOption(listId, SortOption.NAME)
+                                showSortMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(
+                                "Por cantidad",
+                                color = if (sortOption == SortOption.QUANTITY) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                            ) },
+                            onClick = {
+                                viewModel.updateSortOption(listId, SortOption.QUANTITY)
+                                showSortMenu = false
+                            }
+                        )
+                    }
+
                 }
             )
         },
