@@ -60,6 +60,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -74,6 +75,7 @@ import java.util.Locale
 fun ShoppingListDetailScreen(
     listId: Long,
     onBack: () -> Unit,
+    onCreateProduct: (listId: Long) -> Unit,
     viewModel: ShoppingViewModel = hiltViewModel()
 ) {
     val list by viewModel.lists.collectAsState()
@@ -109,7 +111,7 @@ fun ShoppingListDetailScreen(
     var showPurchased by remember { mutableStateOf(false) }
     val hasNoResults = pendingItems.isNullOrEmpty() && (showPurchased || purchasedItems.isNullOrEmpty())
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(listId) {
         viewModel.loadShoppingLists()
     }
 
@@ -209,7 +211,10 @@ fun ShoppingListDetailScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
+            FloatingActionButton(
+//                onClick = { showAddDialog = true }
+                onClick = { onCreateProduct(listId) }
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Añadir producto")
             }
         }
@@ -364,7 +369,7 @@ fun ShoppingItemRow(
 
     val textColor = if (isPurchased) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
     val defaultBg = if (isPurchased) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface
-    val selectedBg = MaterialTheme.colorScheme.onTertiaryContainer
+    val selectedBg = MaterialTheme.colorScheme.surfaceContainerHighest
     val bgColor = if (isSelected) selectedBg else defaultBg
 
     val quantityColor = if (isPurchased) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface
@@ -382,13 +387,13 @@ fun ShoppingItemRow(
                 .background(color = bgColor)
                 .pointerInput(Unit) {
                 detectTapGestures(
-                    onLongPress = {
+                    onPress = {
                         isSelected = true
                         showActionsDialog = true
                     }
                 )
-            },
-            verticalAlignment = Alignment.CenterVertically
+            }
+            , verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
                 onClick = onTogglePurchased,
@@ -409,20 +414,26 @@ fun ShoppingItemRow(
                 }
             }
 
-            Text(
-                text = item.name,
-                style = MaterialTheme.typography.bodyLarge,
-                color = textColor,
-            )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = textColor,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
-            Text(
-                text = "${item.quantity} ${item.unit}",
-                color = quantityColor,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(end = 8.dp)
-            )
+            Spacer(modifier = Modifier.width(12.dp)) // Separación visual
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "${item.quantity} ${item.unit}",
+                    color = quantityColor,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 
@@ -457,7 +468,9 @@ fun ShoppingItemRow(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(start = 24.dp, bottom = 8.dp)
+                        modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
