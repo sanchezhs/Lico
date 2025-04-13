@@ -1,5 +1,6 @@
 package com.app.lico.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
@@ -47,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -132,6 +135,8 @@ fun ShoppingListCard(
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var renameInput by remember { mutableStateOf(list.name) }
 
+    val context = LocalContext.current
+
     // BOTTOM SHEET
     if (showBottomSheet) {
         ModalBottomSheet(
@@ -164,8 +169,10 @@ fun ShoppingListCard(
                     )
                 }
 
-                // Contenido
+                // OPTIONS
                 Column(modifier = Modifier.padding(16.dp)) {
+
+                    // EDIT
                     TextButton(onClick = {
                         showBottomSheet = false
                         showRenameDialog = true
@@ -182,6 +189,35 @@ fun ShoppingListCard(
                         )
                     }
 
+                    // SHARE
+                    TextButton(onClick = {
+                        val shareText = buildString {
+                            appendLine("Lista: ${list.name}")
+                            list.items.forEach { item ->
+                                appendLine("- ${item.name} (${item.quantity} ${item.unit})")
+                            }
+                        }
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, shareText)
+                            type = "text/plain"
+                        }
+                        val shareIntent = Intent.createChooser(sendIntent, "Compartir lista")
+                        context.startActivity(shareIntent)
+                    }) {
+                        Icon(
+                            Icons.Default.Share,
+                            contentDescription = "Share Icon",
+                            modifier = Modifier.size(25.dp),
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "Compartir",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+
+                    // COPY
                     TextButton(onClick = {
                         showBottomSheet = false
                         showCopyDialog = true
@@ -197,6 +233,8 @@ fun ShoppingListCard(
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     }
+
+                    // DELETE
                     TextButton(onClick = {
                         showBottomSheet = false
                         showDeleteConfirm = true
