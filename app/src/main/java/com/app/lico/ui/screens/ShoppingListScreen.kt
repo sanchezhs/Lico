@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.app.lico.R
 import com.app.lico.models.ShoppingList
+import com.app.lico.ui.shared.myTopAppBarColors
 import com.app.lico.viewmodels.ShoppingViewModel
 import java.util.Locale
 
@@ -75,9 +76,9 @@ fun ShoppingListsScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Mis listas") },
+                colors = myTopAppBarColors(),
             )
         },
-
     ) {
         innerPadding ->
             Box(modifier = modifier.padding(innerPadding).fillMaxSize()) {
@@ -352,7 +353,6 @@ fun ShoppingListCard(
     // CARD
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

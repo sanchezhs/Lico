@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.lico.models.ShoppingList
+import com.app.lico.ui.shared.myTopAppBarColors
 import com.app.lico.viewmodels.ShoppingViewModel
 import java.util.Locale
 
@@ -44,7 +45,8 @@ fun NewListScreen (
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                     }
-                }
+                },
+                colors = myTopAppBarColors()
             )
         }
     ) { innerPadding ->
