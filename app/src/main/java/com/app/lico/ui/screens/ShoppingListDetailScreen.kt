@@ -3,11 +3,11 @@ package com.app.lico.ui.screens
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -55,17 +55,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.lico.R
 import com.app.lico.models.ShoppingItem
 import com.app.lico.models.SortOption
+import com.app.lico.ui.shared.myTopAppBarColors
 import com.app.lico.viewmodels.ShoppingViewModel
 import java.util.Locale
 
@@ -74,8 +76,11 @@ import java.util.Locale
 fun ShoppingListDetailScreen(
     listId: Long,
     onBack: () -> Unit,
+    onCreateProduct: (listId: Long) -> Unit,
     viewModel: ShoppingViewModel = hiltViewModel()
 ) {
+    viewModel.loadShoppingLists()
+
     val list by viewModel.lists.collectAsState()
     val currentList = list.find { it.id == listId }
 
@@ -109,9 +114,9 @@ fun ShoppingListDetailScreen(
     var showPurchased by remember { mutableStateOf(false) }
     val hasNoResults = pendingItems.isNullOrEmpty() && (showPurchased || purchasedItems.isNullOrEmpty())
 
-    LaunchedEffect(Unit) {
-        viewModel.loadShoppingLists()
-    }
+//    LaunchedEffect(listId) {
+//        viewModel.loadShoppingLists()
+//    }
 
     LaunchedEffect(isSearching) {
         if (isSearching) {
@@ -124,6 +129,7 @@ fun ShoppingListDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                colors = myTopAppBarColors(),
                 title = {
                     AnimatedContent(targetState = isSearching, label = "searchBar") { searching ->
                         if (searching) {
@@ -142,6 +148,9 @@ fun ShoppingListDetailScreen(
                                     disabledTextColor = Color.Transparent,
                                     focusedIndicatorColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent,
+                                    focusedTextColor = Color.White,
+                                    focusedPlaceholderColor = Color.White,
+                                    cursorColor = Color.White,
                                 )
                             )
                         } else {
@@ -204,12 +213,13 @@ fun ShoppingListDetailScreen(
                             }
                         )
                     }
-
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
+            FloatingActionButton(
+                onClick = { onCreateProduct(listId) }
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Añadir producto")
             }
         }
@@ -217,8 +227,10 @@ fun ShoppingListDetailScreen(
         currentList?.let { list ->
             LazyColumn(
                 modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth()
                     .padding(innerPadding)
-                    .padding(16.dp)
+                    .padding(0.dp)
             ) {
                 items(pendingItems.orEmpty()) { item ->
                     ShoppingItemRow(
@@ -231,7 +243,7 @@ fun ShoppingListDetailScreen(
                             list.id
                         )
                     })
-                    Spacer(modifier = Modifier.height(7.dp))
+                    Spacer(modifier = Modifier.height(1.dp))
                 }
                 item {
                     if (hasNoResults && searchQuery.isNotBlank()) {
@@ -260,7 +272,7 @@ fun ShoppingListDetailScreen(
                         }
 
                         if (showPurchased) {
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
 
                             purchasedItems.forEach { item ->
                                 ShoppingItemRow(
@@ -275,7 +287,7 @@ fun ShoppingListDetailScreen(
                                         )
                                     }
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(1.dp))
                             }
                         }
                     }
@@ -364,7 +376,7 @@ fun ShoppingItemRow(
 
     val textColor = if (isPurchased) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
     val defaultBg = if (isPurchased) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface
-    val selectedBg = MaterialTheme.colorScheme.onTertiaryContainer
+    val selectedBg = MaterialTheme.colorScheme.surfaceContainerHighest
     val bgColor = if (isSelected) selectedBg else defaultBg
 
     val quantityColor = if (isPurchased) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface
@@ -372,7 +384,7 @@ fun ShoppingItemRow(
     Surface(
         color = bgColor,
         shadowElevation = 4.dp,
-        shape = MaterialTheme.shapes.medium,
+        shape = RectangleShape,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -382,13 +394,13 @@ fun ShoppingItemRow(
                 .background(color = bgColor)
                 .pointerInput(Unit) {
                 detectTapGestures(
-                    onLongPress = {
+                    onTap = {
                         isSelected = true
                         showActionsDialog = true
                     }
                 )
-            },
-            verticalAlignment = Alignment.CenterVertically
+            }
+            , verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
                 onClick = onTogglePurchased,
@@ -409,20 +421,26 @@ fun ShoppingItemRow(
                 }
             }
 
-            Text(
-                text = item.name,
-                style = MaterialTheme.typography.bodyLarge,
-                color = textColor,
-            )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = textColor,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
-            Text(
-                text = "${item.quantity} ${item.unit}",
-                color = quantityColor,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(end = 8.dp)
-            )
+            Spacer(modifier = Modifier.width(12.dp)) // Separación visual
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "${item.quantity} ${item.unit}",
+                    color = quantityColor,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 
@@ -430,8 +448,8 @@ fun ShoppingItemRow(
     if (showActionsDialog) {
         ModalBottomSheet(
             onDismissRequest = {
-                showActionsDialog = false
                 isSelected = false
+                showActionsDialog = false
             },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             containerColor = Color.White,
@@ -457,15 +475,17 @@ fun ShoppingItemRow(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(start = 24.dp, bottom = 8.dp)
+                        modifier = Modifier.padding(start = 24.dp, bottom = 8.dp),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
                 // Contenido
                 Column(modifier = Modifier.padding(16.dp)) {
                     TextButton(onClick = {
-                        showActionsDialog = false
                         isSelected = false
+                        showActionsDialog = false
                         showEditDialog = true
                     }) {
                         Icon(
@@ -481,8 +501,8 @@ fun ShoppingItemRow(
                     }
 
                     TextButton(onClick = {
-                        showActionsDialog = false
                         isSelected = false
+                        showActionsDialog = false
                         showDeleteDialog = true
                     }) {
                         Icon(
@@ -556,8 +576,8 @@ fun ShoppingItemRow(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = {
-                showDeleteDialog = false
                 isSelected = false
+                showDeleteDialog = false
             },
             title = { Text("Eliminar producto") },
             text = { Text("¿Seguro que quieres eliminar este producto?") },
@@ -571,98 +591,13 @@ fun ShoppingItemRow(
             },
             dismissButton = {
                 TextButton(onClick = {
-                    showDeleteDialog = false
                     isSelected = false
+                    showDeleteDialog = false
                 }) {
                     Text("Cancelar")
                 }
             }
         )
-    }
-}
-
-@Composable
-fun ActionsDialog(
-    onDismiss: () -> Unit,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit
-) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = MaterialTheme.shapes.medium,
-            tonalElevation = 2.dp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(2.dp)
-        ) {
-            Column {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Acciones",
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Opciones
-                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    TextButton(
-                        onClick = {
-                            onDismiss()
-                            onEdit()
-                        }
-                    ) {
-                        Icon(
-                            Icons.Default.Edit,
-                            contentDescription = "Edit Icon",
-                            modifier = Modifier.size(25.dp),
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            text = "Renombrar",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-
-                    TextButton(
-                        onClick = {
-                            onDismiss()
-                            onDelete()
-                        }
-                    ) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Delete Icon",
-                            modifier = Modifier.size(25.dp),
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            text = "Borrar",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(
-                            onClick = onDismiss
-                        ) {
-                            Text("Cancelar")
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
     }
 }
 

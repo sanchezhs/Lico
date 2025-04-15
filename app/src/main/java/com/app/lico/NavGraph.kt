@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.app.lico.ui.screens.AddProductScreen
 import com.app.lico.ui.screens.ShoppingListsScreen
 import com.app.lico.ui.screens.NewListScreen
 import com.app.lico.ui.screens.ShoppingListDetailScreen
@@ -13,6 +14,7 @@ object Routes {
     const val LISTS = "lists"
     const val NEW_LIST = "new_list"
     const val LIST_DETAIL = "list_detail"
+    const val ADD_PRODUCT = "add_product"
 }
 
 @Composable
@@ -34,9 +36,20 @@ fun AppNavGraph(navController: NavHostController) {
             if (listId != null) {
                 ShoppingListDetailScreen(
                     listId = listId,
+                    onBack = { navController.popBackStack() },
+                    onCreateProduct = { navController.navigate("add_product/$it") }
+                )
+            }
+        }
+        composable("${Routes.ADD_PRODUCT}/{listId}") { backStackEntry ->
+            val listId = backStackEntry.arguments?.getString("listId")?.toLongOrNull()
+            if (listId != null) {
+                AddProductScreen(
+                    listId = listId,
                     onBack = { navController.popBackStack() }
                 )
             }
         }
+
     }
 }
