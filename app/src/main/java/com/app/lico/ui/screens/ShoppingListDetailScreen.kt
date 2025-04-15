@@ -79,10 +79,11 @@ fun ShoppingListDetailScreen(
     onCreateProduct: (listId: Long) -> Unit,
     viewModel: ShoppingViewModel = hiltViewModel()
 ) {
-    viewModel.loadShoppingLists()
+//    viewModel.loadShoppingLists()
+    val currentList by viewModel.getListWithItems(listId).collectAsState(initial = null)
 
-    val list by viewModel.lists.collectAsState()
-    val currentList = list.find { it.id == listId }
+//    val list by viewModel.lists.collectAsState()
+//    val currentList = list.find { it.id == listId }
 
     val sortOption = currentList?.sortOption ?: SortOption.DEFAULT
     var showSortMenu by remember { mutableStateOf(false) }

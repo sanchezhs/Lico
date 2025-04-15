@@ -10,8 +10,12 @@ import com.app.lico.models.ShoppingItem
 import com.app.lico.models.ShoppingList
 import com.app.lico.models.SortOption
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,16 +28,42 @@ class ShoppingViewModel @Inject constructor(
     private val _lists = MutableStateFlow<List<ShoppingList>>(emptyList())
     val lists: StateFlow<List<ShoppingList>> = _lists
 
-    fun loadShoppingLists() {
+    init {
+        observeLists()
+    }
+
+    private fun observeLists() {
         viewModelScope.launch {
-            val listEntities = listDao.getAllLists()
-            val fullLists = listEntities.map { list ->
-                val items = itemDao.getItemsByList(list.id).map { it.toDomain() }
-                list.toDomain(items)
-            }
-            _lists.value = fullLists
+            listDao.getAllLists()
+                .combine(itemDao.getAllItemsFlow()) { listEntities, allItems ->
+                    listEntities.map { list ->
+                        val items = allItems.filter { it.listId == list.id }.map { it.toDomain() }
+                        list.toDomain(items)
+                    }
+                }
+                .collectLatest { fullLists ->
+                    _lists.value = fullLists
+                }
         }
     }
+
+    fun getListWithItems(listId: Long): Flow<ShoppingList?> {
+        return listDao.getListById(listId)
+            .combine(itemDao.getItemsForListFlow(listId)) { listEntity, items ->
+                listEntity?.toDomain(items.map { it.toDomain() })
+            }
+    }
+
+//    fun loadShoppingLists() {
+//        viewModelScope.launch {
+//            val listEntities = listDao.getAllLists()
+//            val fullLists = listEntities.map { list ->
+//                val items = itemDao.getItemsByList(list.).map { it.toDomain() }
+//                list.toDomain(items)
+//            }
+//            _lists.value = fullLists
+//        }
+//    }
 
     fun addShoppingList(list: ShoppingList) {
         viewModelScope.launch {
@@ -41,14 +71,14 @@ class ShoppingViewModel @Inject constructor(
             list.items.forEach { item ->
                 itemDao.insertItem(item.toEntity(listId))
             }
-            loadShoppingLists()
+//            loadShoppingLists()
         }
     }
 
     fun deleteShoppingList(list: ShoppingList) {
         viewModelScope.launch {
             listDao.deleteList(list.toEntity())
-            loadShoppingLists()
+//            loadShoppingLists()
         }
     }
 
@@ -56,7 +86,7 @@ class ShoppingViewModel @Inject constructor(
         viewModelScope.launch {
             val updatedList = list.copy(name = newName)
             listDao.insertList(updatedList.toEntity())
-            loadShoppingLists()
+//            loadShoppingLists()
         }
     }
 
@@ -75,7 +105,7 @@ class ShoppingViewModel @Inject constructor(
                     position = nextPosition,
                 ).toEntity(listId)
             )
-            loadShoppingLists()
+//            loadShoppingLists()
         }
     }
 
@@ -84,7 +114,7 @@ class ShoppingViewModel @Inject constructor(
             itemDao.insertItem(
                 item.copy(isPurchased = !item.isPurchased).toEntity(listId)
             )
-            loadShoppingLists()
+//            loadShoppingLists()
         }
     }
 
@@ -92,7 +122,7 @@ class ShoppingViewModel @Inject constructor(
         viewModelScope.launch {
             val updated = item.copy(name = newName, quantity = newQty, unit = newUnit)
             itemDao.insertItem(updated.toEntity(listId))
-            loadShoppingLists()
+//            loadShoppingLists()
         }
     }
 
@@ -100,14 +130,14 @@ class ShoppingViewModel @Inject constructor(
         viewModelScope.launch {
             itemDao.deleteItem(item.toEntity(listId))
             normalizePositions(listId)
-            loadShoppingLists()
+//            loadShoppingLists()
         }
     }
 
     fun updateSortOption(listId: Long, option: SortOption) {
         viewModelScope.launch {
             listDao.updateSortOption(listId, option.name)
-            loadShoppingLists()
+//            loadShoppingLists()
         }
     }
 

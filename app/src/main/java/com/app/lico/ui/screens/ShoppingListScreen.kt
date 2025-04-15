@@ -1,7 +1,9 @@
 package com.app.lico.ui.screens
 
 import android.content.Intent
+import android.widget.Space
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,9 +72,10 @@ fun ShoppingListsScreen(
 ) {
     val shoppingLists by viewModel.lists.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.loadShoppingLists()
-    }
+//    LaunchedEffect(Unit) {
+//        viewModel.loadShoppingLists()
+//    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -115,7 +118,7 @@ fun ShoppingListsScreen(
                         modifier = Modifier.size(25.dp),
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Crear nueva lista")
+                    Text("Crear lista".uppercase(), style = MaterialTheme.typography.titleMedium)
                 }
             }
     }
@@ -369,33 +372,41 @@ fun ShoppingListCard(
                     text = list.name.uppercase(Locale.getDefault()),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
                 )
-                IconButton(onClick = { showBottomSheet = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
+                Spacer(modifier = Modifier.weight(1.0f))
+
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clickable { showBottomSheet = true },
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "Más opciones"
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(MaterialTheme.shapes.small),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.onPrimary,
-                gapSize = 0.dp,
-                drawStopIndicator = {},
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "$purchasedItems / $totalItems",
-                style = MaterialTheme.typography.bodyLarge
-            )
+            Row (
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .height(6.dp)
+                        .clip(MaterialTheme.shapes.small),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.onPrimary,
+                    gapSize = 0.dp,
+                    drawStopIndicator = {},
+                )
+                Spacer(modifier = Modifier.weight(1.0f))
+                Text(
+                    text = "$purchasedItems/$totalItems ",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         }
     }
 }
