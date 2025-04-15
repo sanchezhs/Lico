@@ -2,15 +2,21 @@ package com.app.lico.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,6 +44,7 @@ fun NewListScreen (
     var listName by remember { mutableStateOf("") }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text("Nueva lista") },
@@ -53,6 +60,8 @@ fun NewListScreen (
         Box(
             modifier = Modifier
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .systemBarsPadding()
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
@@ -69,8 +78,8 @@ fun NewListScreen (
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-
             Button(
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                 onClick = {
                     if (listName.isNotBlank()) {
                         viewModel.addShoppingList(
@@ -86,9 +95,9 @@ fun NewListScreen (
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                    .imePadding()
             ) {
-                Text("CREAR")
+                Text(text = "CREAR", style = MaterialTheme.typography.titleMedium)
             }
         }
     }

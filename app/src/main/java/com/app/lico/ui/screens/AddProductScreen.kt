@@ -85,7 +85,7 @@ fun AddProductScreen(
                             viewModel.addItemToList(
                                 name = product.name ?: "Producto",
                                 quantity = 1.0,
-                                unit = product.referenceUnit ?: "uds",
+                                unit = "uds",
                                 listId = listId
                             )
                         }

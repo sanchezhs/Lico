@@ -3,7 +3,6 @@ package com.app.lico.ui.screens
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -64,7 +63,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.lico.R
 import com.app.lico.models.ShoppingItem
@@ -450,8 +448,8 @@ fun ShoppingItemRow(
     if (showActionsDialog) {
         ModalBottomSheet(
             onDismissRequest = {
-                showActionsDialog = false
                 isSelected = false
+                showActionsDialog = false
             },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             containerColor = Color.White,
@@ -486,8 +484,8 @@ fun ShoppingItemRow(
                 // Contenido
                 Column(modifier = Modifier.padding(16.dp)) {
                     TextButton(onClick = {
-                        showActionsDialog = false
                         isSelected = false
+                        showActionsDialog = false
                         showEditDialog = true
                     }) {
                         Icon(
@@ -503,8 +501,8 @@ fun ShoppingItemRow(
                     }
 
                     TextButton(onClick = {
-                        showActionsDialog = false
                         isSelected = false
+                        showActionsDialog = false
                         showDeleteDialog = true
                     }) {
                         Icon(
@@ -578,8 +576,8 @@ fun ShoppingItemRow(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = {
-                showDeleteDialog = false
                 isSelected = false
+                showDeleteDialog = false
             },
             title = { Text("Eliminar producto") },
             text = { Text("¿Seguro que quieres eliminar este producto?") },
@@ -593,8 +591,8 @@ fun ShoppingItemRow(
             },
             dismissButton = {
                 TextButton(onClick = {
-                    showDeleteDialog = false
                     isSelected = false
+                    showDeleteDialog = false
                 }) {
                     Text("Cancelar")
                 }

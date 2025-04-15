@@ -2,6 +2,7 @@ package com.app.lico.ui.screens
 
 import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -82,23 +83,26 @@ fun ShoppingListsScreen(
     ) {
         innerPadding ->
             Box(modifier = modifier.padding(innerPadding).fillMaxSize()) {
-                LazyColumn(
-                    modifier = modifier
-                        .padding(16.dp)
-                        .fillMaxSize()
-                ) {
-                    items(shoppingLists) { list ->
-                        ShoppingListCard(
-                            list = list,
-                            onClick = { onNavigateListDetail(list.id) },
-                            onRename = { newName -> viewModel.renameShoppingList(list, newName) },
-                            onDelete = { viewModel.deleteShoppingList(list) },
-                            onCopy = { newList -> viewModel.addShoppingList(newList) }
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+                if (shoppingLists.isEmpty()) {
+                    EmptyListPlaceholder()
+                } else {
+                    LazyColumn(
+                        modifier = modifier
+                            .padding(16.dp)
+                            .fillMaxSize()
+                    ) {
+                        items(shoppingLists) { list ->
+                            ShoppingListCard(
+                                list = list,
+                                onClick = { onNavigateListDetail(list.id) },
+                                onRename = { newName -> viewModel.renameShoppingList(list, newName) },
+                                onDelete = { viewModel.deleteShoppingList(list) },
+                                onCopy = { newList -> viewModel.addShoppingList(newList) }
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                     }
                 }
-
                 ExtendedFloatingActionButton(
                     onClick = { onNavigateNewList() },
                     modifier = Modifier
@@ -393,5 +397,34 @@ fun ShoppingListCard(
                 style = MaterialTheme.typography.bodyLarge
             )
         }
+    }
+}
+
+@Composable
+fun EmptyListPlaceholder() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.empty_shopping_cart),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(96.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "No tienes listas todavía",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Pulsa el botón para crear tu primera lista",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
