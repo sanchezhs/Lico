@@ -26,6 +26,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -299,6 +301,7 @@ fun ShoppingListDetailScreen(
 
     if (showAddDialog) {
         AlertDialog(
+            containerColor = Color.White,
             onDismissRequest = { showAddDialog = false },
             title = { Text("Nuevo producto") },
             text = {
@@ -330,7 +333,7 @@ fun ShoppingListDetailScreen(
                 }
             },
             confirmButton = {
-                TextButton(
+                Button(
                     enabled = itemName.isNotBlank(),
                     onClick = {
                         viewModel.addItemToList(
@@ -527,6 +530,7 @@ fun ShoppingItemRow(
     // EDIT DIALOG
     if (showEditDialog) {
         AlertDialog(
+            containerColor = Color.White,
             onDismissRequest = { showEditDialog = false },
             title = { Text("Editar producto") },
             text = {
@@ -555,7 +559,7 @@ fun ShoppingItemRow(
                 }
             },
             confirmButton = {
-                TextButton(
+                Button(
                     enabled = editName.isNotBlank(),
                     onClick = {
                         viewModel.updateItem(item, editName, editQty.toDoubleOrNull() ?: 1.0, editUnit, listId)
@@ -576,6 +580,7 @@ fun ShoppingItemRow(
     // DELETE DIALOG
     if (showDeleteDialog) {
         AlertDialog(
+            containerColor = Color.White,
             onDismissRequest = {
                 isSelected = false
                 showDeleteDialog = false
@@ -583,7 +588,9 @@ fun ShoppingItemRow(
             title = { Text("Eliminar producto") },
             text = { Text("¿Seguro que quieres eliminar este producto?") },
             confirmButton = {
-                TextButton(onClick = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    onClick = {
                     viewModel.deleteItem(item, listId)
                     showDeleteDialog = false
                 }) {

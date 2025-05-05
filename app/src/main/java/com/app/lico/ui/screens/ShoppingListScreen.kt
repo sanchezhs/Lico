@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -264,6 +266,7 @@ fun ShoppingListCard(
     // RENAMING DIALOG
     if (showRenameDialog) {
         AlertDialog(
+            containerColor = Color.White,
             onDismissRequest = { showRenameDialog = false },
             title = { Text("Renombrar lista") },
             text = {
@@ -275,7 +278,7 @@ fun ShoppingListCard(
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
+                Button(onClick = {
                     onRename(renameInput)
                     showRenameDialog = false
                 }) {
@@ -296,6 +299,7 @@ fun ShoppingListCard(
     // COPY DIALOG
     if (showCopyDialog) {
         AlertDialog(
+            containerColor = Color.White,
             onDismissRequest = { showCopyDialog = false },
             title = { Text("Copiar lista") },
             text = {
@@ -307,7 +311,7 @@ fun ShoppingListCard(
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
+                Button(onClick = {
                     val copiedList = list.copy(
                         id = 0L,
                         name = renameInput,
@@ -335,11 +339,14 @@ fun ShoppingListCard(
     // DELETE CONFIRMATION
     if (showDeleteConfirm) {
         AlertDialog(
+            containerColor = Color.White,
             onDismissRequest = { showDeleteConfirm = false },
             title = { Text("Eliminar lista") },
             text = { Text("¿Seguro que quieres eliminar esta lista? Esta acción no se puede deshacer.") },
             confirmButton = {
-                TextButton(onClick = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    onClick = {
                     onDelete()
                     showDeleteConfirm = false
                 }) {
