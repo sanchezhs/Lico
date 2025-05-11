@@ -40,7 +40,7 @@ object DatabaseModule {
                             ListTypeEntity(id = "todo", displayName = "Tareas", iconName = "check_circle", colorHex = "#1C3A54"),
                             ListTypeEntity(id = "books", displayName = "Libros", iconName = "book", colorHex = "#7A99C8"),
                             ListTypeEntity(id = "travel", displayName = "Viaje", iconName = "flight", colorHex = "#34577D"),
-                            ListTypeEntity(id = "custom", displayName = "Personalizada", iconName = "list", colorHex = "#C6B08D")
+                            ListTypeEntity(id = "custom", displayName = "Otros", iconName = "list", colorHex = "#C6B08D")
                         )
                         provideListTypeDao(provideDatabase(context)).insertAll(types)
                     }
