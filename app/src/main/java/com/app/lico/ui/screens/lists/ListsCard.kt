@@ -241,7 +241,9 @@ fun ListsCard(
         )
     }
 
-    Column {
+    Column(
+        modifier = Modifier.padding(0.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

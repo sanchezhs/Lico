@@ -1,5 +1,6 @@
 package com.app.lico.ui.screens
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -32,13 +33,13 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -57,18 +58,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.lico.R
 import com.app.lico.models.ListItem
 import com.app.lico.models.SortOption
+import com.app.lico.ui.screens.lists.EmptyListPlaceholder
 import com.app.lico.ui.shared.myTopAppBarColors
 import com.app.lico.viewmodels.ShoppingViewModel
 import java.util.Locale
@@ -81,11 +83,7 @@ fun ShoppingListDetailScreen(
     onCreateProduct: (listId: Long) -> Unit,
     viewModel: ShoppingViewModel = hiltViewModel()
 ) {
-//    viewModel.loadShoppingLists()
     val currentList by viewModel.getListWithItems(listId).collectAsState(initial = null)
-
-//    val list by viewModel.lists.collectAsState()
-//    val currentList = list.find { it.id == listId }
 
     val sortOption = currentList?.sortOption ?: SortOption.DEFAULT
     var showSortMenu by remember { mutableStateOf(false) }
@@ -111,15 +109,11 @@ fun ShoppingListDetailScreen(
             }
         )
 
-    val purchasedItems = sortedItems?.filter { it.isChecked }
+    val checkedItems = sortedItems?.filter { it.isChecked }
     val pendingItems = sortedItems?.filterNot { it.isChecked }
 
-    var showPurchased by remember { mutableStateOf(false) }
-    val hasNoResults = pendingItems.isNullOrEmpty() && (showPurchased || purchasedItems.isNullOrEmpty())
-
-//    LaunchedEffect(listId) {
-//        viewModel.loadShoppingLists()
-//    }
+    var showChecked by remember { mutableStateOf(false) }
+    val hasNoResults = pendingItems.isNullOrEmpty() && (showChecked || checkedItems.isNullOrEmpty())
 
     LaunchedEffect(isSearching) {
         if (isSearching) {
@@ -227,6 +221,14 @@ fun ShoppingListDetailScreen(
             }
         }
     ) { innerPadding ->
+        Log.i("Current_list", currentList.toString())
+        if (currentList != null && currentList!!.items.isEmpty()) {
+            EmptyListPlaceholder(
+                R.drawable.list,
+                "Esta lista está vacía",
+                "Pulsa el botón para añadirle cosas"
+            )
+        }
         currentList?.let { list ->
             LazyColumn(
                 modifier = Modifier
@@ -264,25 +266,25 @@ fun ShoppingListDetailScreen(
                         }
                     }
 
-                    if (!purchasedItems.isNullOrEmpty()) {
+                    if (!checkedItems.isNullOrEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         TextButton (
-                            onClick = { showPurchased = !showPurchased },
+                            onClick = { showChecked = !showChecked },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("(${purchasedItems.size}) Mostrar ítems completados")
+                            Text("(${checkedItems.size}) Mostrar ítems completados")
                         }
 
-                        if (showPurchased) {
+                        if (showChecked) {
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            purchasedItems.forEach { item ->
+                            checkedItems.forEach { item ->
                                 ListItemRow(
                                     viewModel = viewModel,
                                     listId = listId,
                                     item = item,
-                                    isPurchased = true,
+                                    isChecked = true,
                                     onTogglePurchased = {
                                         viewModel.toggleItemPurchased(
                                             item,
@@ -366,7 +368,7 @@ fun ListItemRow(
     item: ListItem,
     listId: Long,
     onTogglePurchased: () -> Unit,
-    isPurchased: Boolean = false,
+    isChecked: Boolean = false,
     viewModel: ShoppingViewModel,
 ) {
     var showActionsDialog by remember { mutableStateOf(false) }
@@ -378,75 +380,68 @@ fun ListItemRow(
     var editUnit by remember { mutableStateOf(item.unit) }
     var isSelected by remember { mutableStateOf(false) }
 
-    val textColor = if (isPurchased) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
-    val defaultBg = if (isPurchased) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surface
-    val selectedBg = MaterialTheme.colorScheme.surfaceContainerHighest
-    val bgColor = if (isSelected) selectedBg else defaultBg
+    val textColor = if (isChecked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+    val itemStyle = if (isChecked) MaterialTheme.typography.bodyLarge.copy(
+        textDecoration = TextDecoration.LineThrough
+    ) else MaterialTheme.typography.bodyLarge
+    val quantityColor = if (isChecked) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface
 
-    val quantityColor = if (isPurchased) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface
-
-    Surface(
-        color = bgColor,
-        shadowElevation = 4.dp,
-        shape = RectangleShape,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-                .background(color = bgColor)
-                .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = {
-                        isSelected = true
-                        showActionsDialog = true
-                    }
-                )
-            }
-            , verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = onTogglePurchased,
-                modifier = Modifier.size(36.dp)
-            ) {
-                if (item.isChecked) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Marcado",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.baseline_radio_button_unchecked_24),
-                        contentDescription = "No marcado",
-                        tint = MaterialTheme.colorScheme.outline
-                    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp, horizontal = 16.dp)
+            .pointerInput(Unit) {
+            detectTapGestures(
+                onTap = {
+                    isSelected = true
+                    showActionsDialog = true
                 }
-            }
-
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = item.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = textColor,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+            )
+        }
+        , verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            onClick = onTogglePurchased,
+            modifier = Modifier.size(36.dp)
+        ) {
+            if (item.isChecked) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Marcado",
+                    tint = MaterialTheme.colorScheme.primary
                 )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp)) // Separación visual
-
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = "${item.quantity} ${item.unit}",
-                    color = quantityColor,
-                    style = MaterialTheme.typography.bodyMedium
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.baseline_radio_button_unchecked_24),
+                    contentDescription = "No marcado",
+                    tint = MaterialTheme.colorScheme.outline
                 )
             }
         }
+
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = item.name,
+                style = itemStyle,
+                color = textColor,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = "${item.quantity} ${item.unit}",
+                color = quantityColor,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
+    
+    HorizontalDivider(thickness = 1.dp, color = Color(0xFFE0E0E0))
 
     // DIALOGS
     if (showActionsDialog) {

@@ -5,16 +5,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -22,9 +19,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.app.lico.R
 import com.app.lico.ui.shared.myTopAppBarColors
 import com.app.lico.viewmodels.ShoppingViewModel
 
@@ -46,15 +43,26 @@ fun ListsScreen(
                 colors = myTopAppBarColors(),
             )
         },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { onNavigateNewList() }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Añadir Lista")
+            }
+        }
     ) {
         innerPadding ->
             Box(modifier = modifier.padding(innerPadding).fillMaxSize()) {
                 if (shoppingLists.isEmpty()) {
-                    EmptyListPlaceholder()
+                    EmptyListPlaceholder(
+                        drawableId = R.drawable.list,
+                        title = "No tienes listas todavía",
+                        subtitle = "Pulsa el botón para crear tu primera lista",
+                    )
                 } else {
                     LazyColumn(
                         modifier = modifier
-                            .padding(16.dp)
+                            .padding(12.dp)
                             .fillMaxSize()
                     ) {
                         items(shoppingLists) { list ->
@@ -69,20 +77,6 @@ fun ListsScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
-                }
-                ExtendedFloatingActionButton(
-                    onClick = { onNavigateNewList() },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(12.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = "Add List Icon",
-                        modifier = Modifier.size(25.dp),
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Nueva lista".uppercase(), style = MaterialTheme.typography.titleMedium)
                 }
             }
     }

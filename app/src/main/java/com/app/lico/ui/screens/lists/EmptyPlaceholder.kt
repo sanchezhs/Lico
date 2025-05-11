@@ -15,10 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.app.lico.R
 
 @Composable
-fun EmptyListPlaceholder() {
+fun EmptyListPlaceholder(
+    drawableId: Int,
+    title: String,
+    subtitle: String
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -27,19 +30,19 @@ fun EmptyListPlaceholder() {
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            painter = painterResource(R.drawable.empty_shopping_cart),
+            painter = painterResource(drawableId),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primaryContainer,
             modifier = Modifier.size(96.dp)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "No tienes listas todavía",
+            text = title,
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Pulsa el botón para crear tu primera lista",
+            text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
