@@ -2,16 +2,19 @@ package com.app.lico.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.app.lico.data.db.dao.ShoppingItemDao
-import com.app.lico.data.db.dao.ShoppingListDao
-import com.app.lico.data.db.entities.ShoppingItemEntity
-import com.app.lico.data.db.entities.ShoppingListEntity
+import com.app.lico.data.db.dao.ListItemDao
+import com.app.lico.data.db.dao.ListDao
+import com.app.lico.data.db.dao.ListTypeDao
+import com.app.lico.data.db.entities.ListItemEntity
+import com.app.lico.data.db.entities.ListEntity
+import com.app.lico.data.db.entities.ListTypeEntity
 
 @Database(
-    entities = [ShoppingListEntity::class, ShoppingItemEntity::class],
-    version = 1
+    entities = [ListEntity::class, ListItemEntity::class, ListTypeEntity::class],
+    version = 3
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun shoppingItemDao(): ShoppingItemDao
-    abstract fun shoppingListDao(): ShoppingListDao
+    abstract fun listItemDao(): ListItemDao
+    abstract fun listsDao(): ListDao
+    abstract fun listTypeDao(): ListTypeDao
 }

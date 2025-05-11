@@ -4,9 +4,10 @@ enum class SortOption {
     DEFAULT, NAME, QUANTITY
 }
 
-data class ShoppingList(
+data class Lists(
     val id: Long,
     var name: String,
-    val items: MutableList<ShoppingItem>,
+    var typeId: String,
+    val items: List<ListItem>,
     val sortOption: SortOption = SortOption.DEFAULT
 )

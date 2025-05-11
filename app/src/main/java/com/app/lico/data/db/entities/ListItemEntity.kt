@@ -6,10 +6,10 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "shopping_items",
+    tableName = "list_items",
     foreignKeys = [
         ForeignKey(
-            entity = ShoppingListEntity::class,
+            entity = ListEntity::class,
             parentColumns = ["id"],
             childColumns = ["listId"],
             onDelete = ForeignKey.CASCADE
@@ -17,12 +17,12 @@ import androidx.room.PrimaryKey
     ],
     indices = [Index("listId")]
 )
-data class ShoppingItemEntity(
+data class ListItemEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
-    val quantity: Double,
-    val unit: String,
-    val isPurchased: Boolean = false,
+    val quantity: Double? = null,
+    val unit: String? = null,
+    val isChecked: Boolean = false,
     val listId: Long,
     val position: Int
 )

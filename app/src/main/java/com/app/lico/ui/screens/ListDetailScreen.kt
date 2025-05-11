@@ -67,7 +67,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.lico.R
-import com.app.lico.models.ShoppingItem
+import com.app.lico.models.ListItem
 import com.app.lico.models.SortOption
 import com.app.lico.ui.shared.myTopAppBarColors
 import com.app.lico.viewmodels.ShoppingViewModel
@@ -111,8 +111,8 @@ fun ShoppingListDetailScreen(
             }
         )
 
-    val purchasedItems = sortedItems?.filter { it.isPurchased }
-    val pendingItems = sortedItems?.filterNot { it.isPurchased }
+    val purchasedItems = sortedItems?.filter { it.isChecked }
+    val pendingItems = sortedItems?.filterNot { it.isChecked }
 
     var showPurchased by remember { mutableStateOf(false) }
     val hasNoResults = pendingItems.isNullOrEmpty() && (showPurchased || purchasedItems.isNullOrEmpty())
@@ -236,7 +236,7 @@ fun ShoppingListDetailScreen(
                     .padding(0.dp)
             ) {
                 items(pendingItems.orEmpty()) { item ->
-                    ShoppingItemRow(
+                    ListItemRow(
                         item,
                         listId,
                         viewModel = viewModel,
@@ -271,14 +271,14 @@ fun ShoppingListDetailScreen(
                             onClick = { showPurchased = !showPurchased },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("(${purchasedItems.size}) Mostrar productos comprados")
+                            Text("(${purchasedItems.size}) Mostrar ítems completados")
                         }
 
                         if (showPurchased) {
                             Spacer(modifier = Modifier.height(6.dp))
 
                             purchasedItems.forEach { item ->
-                                ShoppingItemRow(
+                                ListItemRow(
                                     viewModel = viewModel,
                                     listId = listId,
                                     item = item,
@@ -362,8 +362,8 @@ fun ShoppingListDetailScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShoppingItemRow(
-    item: ShoppingItem,
+fun ListItemRow(
+    item: ListItem,
     listId: Long,
     onTogglePurchased: () -> Unit,
     isPurchased: Boolean = false,
@@ -410,7 +410,7 @@ fun ShoppingItemRow(
                 onClick = onTogglePurchased,
                 modifier = Modifier.size(36.dp)
             ) {
-                if (item.isPurchased) {
+                if (item.isChecked) {
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = "Marcado",
@@ -551,7 +551,7 @@ fun ShoppingItemRow(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
-                        value = editUnit,
+                        value = editUnit ?: "TODO",
                         onValueChange = { editUnit = it },
                         label = { Text("Unidad") },
                         singleLine = true,
@@ -562,7 +562,7 @@ fun ShoppingItemRow(
                 Button(
                     enabled = editName.isNotBlank(),
                     onClick = {
-                        viewModel.updateItem(item, editName, editQty.toDoubleOrNull() ?: 1.0, editUnit, listId)
+                        viewModel.updateItem(item, editName, editQty.toDoubleOrNull() ?: 1.0, editUnit ?: "TODO", listId)
                         showEditDialog = false
                     }
                 ) {

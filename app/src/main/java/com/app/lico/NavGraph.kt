@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.app.lico.ui.screens.AddProductScreen
-import com.app.lico.ui.screens.ShoppingListsScreen
+import com.app.lico.ui.screens.lists.ListsScreen
 import com.app.lico.ui.screens.NewListScreen
 import com.app.lico.ui.screens.ShoppingListDetailScreen
 
@@ -21,7 +21,7 @@ object Routes {
 fun AppNavGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Routes.LISTS) {
         composable(Routes.LISTS) {
-            ShoppingListsScreen(
+            ListsScreen(
                 onNavigateNewList = { navController.navigate(Routes.NEW_LIST) },
                 onNavigateListDetail = { listId -> navController.navigate("${Routes.LIST_DETAIL}/$listId") }
             )

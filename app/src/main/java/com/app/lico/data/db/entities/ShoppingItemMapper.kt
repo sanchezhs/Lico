@@ -1,22 +1,22 @@
 package com.app.lico.data.db.entities
 
-import com.app.lico.models.ShoppingItem
+import com.app.lico.models.ListItem
 
-fun ShoppingItemEntity.toDomain(): ShoppingItem = ShoppingItem(
+fun ListItemEntity.toDomain(): ListItem = ListItem(
     id = id,
     name = name,
     quantity = quantity,
     unit = unit,
-    isPurchased = isPurchased,
+    isChecked = isChecked,
     position = position,
 )
 
-fun ShoppingItem.toEntity(listId: Long): ShoppingItemEntity = ShoppingItemEntity(
+fun ListItem.toEntity(listId: Long): ListItemEntity = ListItemEntity(
     id = id,
     name = name,
     quantity = quantity,
     unit = unit,
-    isPurchased = isPurchased,
+    isChecked = isChecked,
     listId = listId,
     position = position,
 )
