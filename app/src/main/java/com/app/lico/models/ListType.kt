@@ -6,7 +6,8 @@ data class ListType(
     val id: String,
     val displayName: String,
     val iconName: String,
-    val colorHex: String
+    val colorHex: String,
+    val showQuantity: Boolean
 )
 
 fun ListType.toIconRes(): Int = when (iconName) {

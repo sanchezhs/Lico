@@ -11,7 +11,7 @@ import com.app.lico.data.db.entities.ListTypeEntity
 
 @Database(
     entities = [ListEntity::class, ListItemEntity::class, ListTypeEntity::class],
-    version = 3
+    version = 4
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun listItemDao(): ListItemDao

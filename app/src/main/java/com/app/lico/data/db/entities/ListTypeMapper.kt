@@ -10,7 +10,8 @@ fun ListTypeEntity.toDomain(): ListType =
         id = id,
         displayName = displayName,
         iconName = iconName,
-        colorHex = colorHex
+        colorHex = colorHex,
+        showQuantity = showQuantity
 )
 
 fun ListEntity.toDomain(

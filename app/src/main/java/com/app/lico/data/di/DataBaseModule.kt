@@ -36,11 +36,11 @@ object DatabaseModule {
                     super.onCreate(db)
                     CoroutineScope(Dispatchers.IO).launch {
                         val types = listOf(
-                            ListTypeEntity(id = "shopping", displayName = "Compras", iconName = "shopping_cart", colorHex = "#A5C2EE"),
-                            ListTypeEntity(id = "todo", displayName = "Tareas", iconName = "check_circle", colorHex = "#1C3A54"),
-                            ListTypeEntity(id = "books", displayName = "Libros", iconName = "book", colorHex = "#7A99C8"),
-                            ListTypeEntity(id = "travel", displayName = "Viaje", iconName = "flight", colorHex = "#34577D"),
-                            ListTypeEntity(id = "custom", displayName = "Otros", iconName = "list", colorHex = "#C6B08D")
+                            ListTypeEntity(id = "shopping", displayName = "Compras", iconName = "shopping_cart", colorHex = "#A5C2EE", showQuantity = true),
+                            ListTypeEntity(id = "todo", displayName = "Tareas", iconName = "check_circle", colorHex = "#1C3A54", showQuantity = false),
+                            ListTypeEntity(id = "books", displayName = "Libros", iconName = "book", colorHex = "#7A99C8", showQuantity = false),
+                            ListTypeEntity(id = "travel", displayName = "Viaje", iconName = "flight", colorHex = "#34577D", showQuantity = false),
+                            ListTypeEntity(id = "custom", displayName = "Otros", iconName = "list", colorHex = "#C6B08D", showQuantity = false)
                         )
                         provideListTypeDao(provideDatabase(context)).insertAll(types)
                     }

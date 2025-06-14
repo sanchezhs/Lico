@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.lico.R
 import com.app.lico.models.ListItem
+import com.app.lico.models.ListType
 import com.app.lico.models.SortOption
 import com.app.lico.ui.screens.lists.EmptyListPlaceholder
 import com.app.lico.ui.shared.myTopAppBarColors
@@ -84,6 +85,7 @@ fun ShoppingListDetailScreen(
     viewModel: ShoppingViewModel = hiltViewModel()
 ) {
     val currentList by viewModel.getListWithItems(listId).collectAsState(initial = null)
+    val listTypes by viewModel.listsTypes.collectAsState(initial = null)
 
     val sortOption = currentList?.sortOption ?: SortOption.DEFAULT
     var showSortMenu by remember { mutableStateOf(false) }
@@ -114,6 +116,7 @@ fun ShoppingListDetailScreen(
 
     var showChecked by remember { mutableStateOf(false) }
     val hasNoResults = pendingItems.isNullOrEmpty() && (showChecked || checkedItems.isNullOrEmpty())
+
 
     LaunchedEffect(isSearching) {
         if (isSearching) {
@@ -221,7 +224,6 @@ fun ShoppingListDetailScreen(
             }
         }
     ) { innerPadding ->
-        Log.i("Current_list", currentList.toString())
         if (currentList != null && currentList!!.items.isEmpty()) {
             EmptyListPlaceholder(
                 R.drawable.list,
@@ -240,6 +242,7 @@ fun ShoppingListDetailScreen(
                 items(pendingItems.orEmpty()) { item ->
                     ListItemRow(
                         item,
+                        listTypes?.find { it.id == list.typeId }!!.showQuantity,
                         listId,
                         viewModel = viewModel,
                         onTogglePurchased = {
@@ -282,6 +285,7 @@ fun ShoppingListDetailScreen(
                             checkedItems.forEach { item ->
                                 ListItemRow(
                                     viewModel = viewModel,
+                                    showQuantity = listTypes?.find { it.id == list.typeId }!!.showQuantity,
                                     listId = listId,
                                     item = item,
                                     isChecked = true,
@@ -366,6 +370,7 @@ fun ShoppingListDetailScreen(
 @Composable
 fun ListItemRow(
     item: ListItem,
+    showQuantity: Boolean,
     listId: Long,
     onTogglePurchased: () -> Unit,
     isChecked: Boolean = false,
@@ -430,14 +435,16 @@ fun ListItemRow(
             )
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        if (showQuantity) {
+            Spacer(modifier = Modifier.width(12.dp))
 
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = "${item.quantity} ${item.unit}",
-                color = quantityColor,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = "${item.quantity} ${item.unit}",
+                    color = quantityColor,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
     
